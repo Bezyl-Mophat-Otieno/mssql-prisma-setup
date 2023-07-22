@@ -1,0 +1,34 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Customers {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Orders[] // One customer can have multiple orders
+}
+
+model Products {
+  id    String @id @default(uuid())
+  name  String
+  price Float
+}
+
+model Orders {
+  id         String    @id @default(uuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  customer   Customers @relation(fields: [customerId], references: [id]) // An order belongs to a single customer
+  customerId String
+}
