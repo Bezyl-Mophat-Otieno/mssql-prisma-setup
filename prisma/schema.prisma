@@ -10,25 +10,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Customers {
+// model Customers {
+//   id        String   @id @default(uuid())
+//   name      String
+//   email     String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   orders    Orders[] // One customer can have multiple orders
+// }
+
+// model Products {
+//   id     String   @id @default(uuid())
+//   name   String
+//   price  Float
+//   // An order can have multiple products
+//   orders Orders[]
+// }
+
+// model Orders {
+//   id         String     @id @default(uuid())
+//   createdAt  DateTime   @default(now())
+//   updatedAt  DateTime   @updatedAt
+//   customer   Customers  @relation(fields: [customerId], references: [id]) // An order belongs to a single customer
+//   customerId String
+//   products   Products[] // An order can have multiple products
+// }
+
+//ONE TO ONE RELATIONSHIP
+
+model User {
   id        String   @id @default(uuid())
-  name      String
-  email     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  orders    Orders[] // One customer can have multiple orders
+  profile   Profile?
+  order     Order[]
 }
 
-model Products {
-  id    String @id @default(uuid())
-  name  String
-  price Float
+model Profile {
+  id     String @id @default(uuid())
+  name   String @unique
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
 }
 
-model Orders {
-  id         String    @id @default(uuid())
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  customer   Customers @relation(fields: [customerId], references: [id]) // An order belongs to a single customer
-  customerId String
+model Order {
+  id      String    @id @default(uuid())
+  product Product[]
+
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id String @id @default(uuid())
+
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  Product Product[]
+}
+
+model Product {
+  id String @id @default(uuid())
+
+  name       String
+  price      Float
+  order      Order[]
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

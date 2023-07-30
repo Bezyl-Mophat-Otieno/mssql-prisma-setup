@@ -11,51 +11,96 @@ app.use(express.json())
 
 // Crud operations for creating customers 
 
-app.post('/customers',async(req,res)=>{
+const createUserWithProfile  = async ()=>{
 
-const customer = await prisma.customers.create({
-    data:req.body
-})
-res.json(customer)
+const user = await prisma.user.create({
+    data:{}
 })
 
-app.get('/customers',async(req,res)=>{ 
-
-    const allCustomers = await prisma.customers.findMany()
-    res.json(allCustomers)  
+const profile = await prisma.profile.create({
+    data:{
+        name:"Deno",
+        userId:user.id
+    }
 })
 
-// crud operations for adding products 
+const userOne= await prisma.user.findUnique({
+    where:{
+        id:user.id
+    },
+    include:{
+        profile:{
+            select:{
+                name:false,
+                id:true
+            }
 
-app.post('/products',async(req,res)=>{
-
- const product = await prisma.products.create({
-        data:req.body
- })
- res.json(product)
-
+        }
+      
+    }
+ 
 })
-// Crud Operation for creating orders
-app.get('/orders',async(req,res)=>{
 
-    const allProducts = await prisma.orders.findMany()
-    res.json(allProducts)
+const userTwo = await prisma.user.create({
+    data:{
+        profile:{
+            create:{
+                name:'Allen',
+                id:user.id
+            }
+        }
+    },
+    include:{
+        profile:true
+    }
 })
-app.post('/orders',async(req,res)=>{
 
-    const product = await prisma.orders.create({
-           data:req.body
-    })
-    res.json(product)
-   
-   })
-   
-   app.get('/products',async(req,res)=>{
-   
-       const allProducts = await prisma.products.findMany()
-       res.json(allProducts)
-   })
+return {userOne,userTwo}
 
+
+}
+
+
+// console.log('one-to-one relationship')
+// console.log(await createUserWithProfile())
+
+// CREATING A USER WITH AN ORDER
+
+const createUserWithOrder = async ()=>{
+  const user1 = await prisma.user.create({
+        data:{}
+  })
+
+  const order1 = await prisma.order.create({
+        data:{
+            userId:'53d65cf1-3dda-4bf2-92ad-1a50444e6f71'
+        }
+  })
+
+  const userWithId = await prisma.user.findUnique({
+    where:{
+        id:'53d65cf1-3dda-4bf2-92ad-1a50444e6f71'
+    },include:{
+        order:{
+            select:{
+                id:true
+            }
+        }
+    }
+  })
+
+  const ordersWithUser = await prisma.order.findMany({
+        where:{
+            userId:'53d65cf1-3dda-4bf2-92ad-1a50444e6f71'
+        }
+  })
+  return {userWithId,ordersWithUser}
+ 
+
+}
+
+console.log('one-to-many relationship')
+console.log(await createUserWithOrder())
 
 app.listen(5000,()=>{
     console.log("server started on port 5000")
